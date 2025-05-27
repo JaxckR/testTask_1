@@ -2,25 +2,25 @@ import argparse
 
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-
 
 class ParseCSV:
 
     def __init__(
             self,
-            *args: list[str, ...],
-            report: str | None = None
+            *args: list,
+            report: str | None = None,
+            base_dir: Path = Path(__file__).resolve().parent.parent.parent / "data",
     ) -> None:
         self._data_files = args[0]
         self._report = report
         self._dict_data = {}
+        self.base_dir = base_dir
 
     def parse_csv(self) -> None:
         '''Method for parse csv files to python dict'''
 
         for file in self._data_files:
-            file_path = BASE_DIR / file
+            file_path = self.base_dir / file
             try:
                 with open(file_path, "r") as f:
                     data = f.read()
@@ -32,7 +32,7 @@ class ParseCSV:
                         self._dict_data[file].append({data[0][indx]: i[indx] for indx in range(len(i))})
 
             except FileNotFoundError:
-                print(f"File {BASE_DIR / file[0]} not found")
+                print(f"File {self.base_dir / file[0]} not found")
 
     def _calculate_payout(self):
         '''Method for calculate payout and write it to dict'''
@@ -57,6 +57,7 @@ class ParseCSV:
         '''Method for print report in console'''
         self._calculate_payout()
 
+        result = ""
         for file, value in self._dict_data.items():
             data = []
             department = set()
@@ -66,23 +67,24 @@ class ParseCSV:
                 )
                 department.add(row["department"])
 
-            print(f"{file:=^80}")
+            result += f"{file:=^80}\n"
 
             format_text = "{:<20} {:<30} {:<20} {:<20}"
-            print(format_text.format(*["", "name", "hours_worked", "payout"]))
+            result += format_text.format(*["", "name", "hours_worked", "payout"]) + "\n"
             for dep in department:
-                print(dep)
+                result += dep + "\n"
                 hours_sum = 0
                 payout_sum = 0
                 for row in data:
                     if row[-1] == dep:
-                        print(format_text.format(*row[:-1]))
+                        result += format_text.format(*row[:-1]) + "\n"
                         hours_sum += int(row[2])
                         payout_sum += int(row[3])
-                print(format_text.format(*["", "", hours_sum, payout_sum]))
-            print("=" * 80 + "\n")
+                result += format_text.format(*["", "", hours_sum, payout_sum]) + "\n"
+            result += "=" * 80 + "\n"
+        return result
 
-    def get_result(self):
+    def get_result(self) -> str | None:
         '''Method for get result by report arg.
             Can extend in future'''
 
@@ -104,4 +106,4 @@ if __name__ == "__main__":
 
     parser_class = ParseCSV(parse_args.data, report=parse_args.report)
     parser_class.parse_csv()
-    parser_class.get_result()
+    print(parser_class.get_result())
