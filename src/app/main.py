@@ -54,7 +54,7 @@ class ParseCSV:
                 value["payout"] = payout
 
     def _report_payout(self):
-        '''Method for print report in console'''
+        '''Returning string report result'''
         self._calculate_payout()
 
         result = ""
