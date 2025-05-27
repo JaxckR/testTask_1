@@ -17,7 +17,7 @@ class ParseCSV:
         self._dict_data = {}
 
     def parse_csv(self) -> None:
-        '''Method for parse csv file to python dict'''
+        '''Method for parse csv files to python dict'''
 
         for file in self._data_files:
             file_path = BASE_DIR / file
@@ -90,6 +90,7 @@ class ParseCSV:
             return self._report_payout()
 
     def __dict__(self) -> dict:
+        '''Returning parsed csv files in dict'''
         return self._dict_data
 
 
